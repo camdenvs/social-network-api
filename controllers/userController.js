@@ -38,7 +38,7 @@ module.exports = {
                 !user
                     ? res.status(404).json({ message: 'No such user exists' })
                     : Thought.deleteMany({
-                        _id: req.params.userId
+                        username: user.username
                     })
             )
             .then((thought) =>
@@ -72,16 +72,11 @@ module.exports = {
     },
     // Add user as friend
     addFriend(req, res) {
-        User.findOne({ _id: req.params.friendId })
-            .then((friend) =>
-                !friend
-                    ? res.status(404).json({ message: 'No such user exists' })
-                    : User.findOneAndUpdate(
-                        { _id: req.params.userId },
-                        { $addToSet: { friends: friend._id } },
-                        { runValidators: true, new: true }
-                    )
-            )
+        User.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $addToSet: { friends: req.params.friendId } },
+            { runValidators: true, new: true }
+        )
             .then((user) =>
                 !user
                     ? res.status(404).json({ message: 'No user with this ID found' })
@@ -93,7 +88,7 @@ module.exports = {
     removeFriend(req, res) {
         User.findOneAndUpdate(
             { _id: req.params.userId },
-            { $pull: req.params.friendId },
+            { $pull: { friends: req.params.friendId }},
             { runValidators: true, new: true }
         )
             .then((user) =>

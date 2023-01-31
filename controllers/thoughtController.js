@@ -23,8 +23,8 @@ module.exports = {
         Thought.create(req.body)
             .then((thought) => {
                 res.json(thought)
-                User.findOneAndUpdate(
-                    { _id: req.body.userId },
+                return User.findOneAndUpdate(
+                    { username: req.body.username },
                     { $addToSet: { thoughts: thought._id } },
                     { new: true }
                 )
@@ -42,7 +42,7 @@ module.exports = {
                     ? res.status(404).json({ message: 'No thought with that ID' })
                     : User.deleteMany({ _id: { $in: thought.users } })
             )
-            .then(() => res.json({ message: 'Thought and users deleted!' }))
+            .then(() => res.json({ message: 'Thought deleted!' }))
             .catch((err) => res.status(500).json(err));
     },
     // Update a thought
@@ -79,7 +79,7 @@ module.exports = {
     removeReaction(req, res) {
         Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
-            { $pull: { reactions: req.body.reactionId } },
+            { $pull: { reactions: { reactionId: req.body.reactionId } } },
             { new: true }
         )
             .then((thought) =>
